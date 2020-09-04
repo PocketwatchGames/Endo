@@ -70,6 +70,15 @@ public class PlanetView
 				int neighborIndex1 = icosphere.Neighbors[i * MaxNeighbors + j];
 				int neighborIndex2 = icosphere.Neighbors[i * MaxNeighbors + (j + 1) % neighborCount];
 
+				//_terrainIndices.Add(i);
+				//_terrainIndices.Add(neighborIndex2);
+				//_terrainIndices.Add(neighborIndex1);
+
+				//_waterBackfaceIndices.Add(i);
+				//_waterBackfaceIndices.Add(neighborIndex1);
+				//_waterBackfaceIndices.Add(neighborIndex2);
+
+
 				{
 					float slope = random.NextFloat() * (slopeMax - slopeMin) + slopeMin;
 					float3 slopePoint = (icosphere.Vertices[neighborIndex1] + icosphere.Vertices[neighborIndex2] + pos * (1 + slope)) / (maxSlope + slope);
@@ -166,7 +175,7 @@ public class PlanetView
 		//to.Rotation = math.degrees(from.PlanetState.Rotation);
 
 		var buildRenderStateJobHandle = _perCellJobHelper.Schedule(
-			true, 1,
+			true, 1, dependency,
 			new BuildRenderStateCellJob()
 			{
 				TerrainColor = to.TerrainColor,
@@ -182,7 +191,7 @@ public class PlanetView
 				Ice = from.IceMass,
 				PlanetRadius = staticState.PlanetRadius,
 				TerrainScale = terrainScale
-			}, dependency);
+			});
 
 		return buildRenderStateJobHandle;
 	}
@@ -204,7 +213,7 @@ public class PlanetView
 	public void Update(Mesh terrainMesh, Mesh waterMesh, Mesh waterBackfaceMesh, Mesh overlayMesh, ViewState viewState, JobHandle dependencies)
 	{
 		var getVertsHandle = _perVertexJobHelper.Schedule(
-			JobType.Schedule, 64,
+			JobType.Schedule, 64, dependencies,
 			new BuildTerrainVertsJob()
 			{
 				VTerrainPosition = _terrainVertices,
@@ -221,7 +230,7 @@ public class PlanetView
 				WaterColor = viewState.WaterColor,
 				Selection = _selectionCells,
 				StandardVerts = _standardVerts,
-			}, dependencies);
+			});
 
 
 		getVertsHandle.Complete();
@@ -343,8 +352,8 @@ public struct BuildRenderStateCellJob : IJobParallelFor
 		TerrainElevation[i] = (elevation * TerrainScale + PlanetRadius) / PlanetRadius;
 
 		float waterDepth = WaterDepth[i];
-		WaterColor[i] = new float4(0,0,1,1);
-		WaterElevation[i] = ((waterDepth == 0) ? 0.99f : ((elevation + waterDepth) * TerrainScale + PlanetRadius) / PlanetRadius);
+		WaterColor[i] = waterDepth > 0 ? new float4(0,0,1,1) : new float4(0,0,0,0);
+		WaterElevation[i] = ((waterDepth == 0) ? 0.1f : ((elevation + waterDepth) * TerrainScale + PlanetRadius) / PlanetRadius);
 	}
 
 

@@ -178,7 +178,6 @@ public class EditHUD : MonoBehaviour
                                     float direction = math.sign(diff) * delta;
                                     float elevation = math.clamp(next.Elevation[index] + direction * selectionCells[i].Item2, tool.MinVal, tool.MaxVal);
                                     next.Elevation[index] = elevation;
-                                    next.WaterDepth[index] = math.max(0, -elevation);
                                     next.Sand[index] = (elevation < 1000) ? 1 : 0;
                                     next.Vegetation[index] = (elevation >= 1000 && elevation < 2500) ? 1 : 0;
                                     next.Dirt[index] = (elevation >= 2500 && elevation < 4000) ? 1 : 0;

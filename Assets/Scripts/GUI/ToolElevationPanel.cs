@@ -30,11 +30,11 @@ public class ToolElevationPanel : MonoBehaviour
         NoisePeriod.value = options.SelectionOptions.NoisePeriod;
         Strength.value = options.Strength;
 
-        if (options.MaxVal == 0 && options.MinVal <= float.MinValue)
+        if (options.SelectionOptions.MaskTop == 0 && options.SelectionOptions.MaskBottom <= float.MinValue)
         {
             MaskOcean.isOn = true;
         }
-        else if (options.MinVal == 0 && options.MaxVal >= float.MaxValue)
+        else if (options.SelectionOptions.MaskBottom == 0 && options.SelectionOptions.MaskTop >= float.MaxValue)
         {
             MaskLand.isOn = true;
         }
@@ -50,7 +50,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 20,
+                BrushSize = 1,
                 Falloff = 0.01f,
                 MaskBottom = float.MinValue,
                 MaskTop = float.MaxValue
@@ -64,7 +64,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 20,
+                BrushSize = 1,
                 Falloff = 0.01f,
                 MaskBottom = float.MinValue,
                 MaskTop = float.MaxValue
@@ -78,7 +78,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 10,
+                BrushSize = 1,
                 Falloff = 0.25f,
                 MaskBottom = 0,
                 MaskTop = float.MaxValue,
@@ -92,7 +92,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 10,
+                BrushSize = 1,
                 Falloff = 0.25f,
                 MaskBottom = 0,
                 MaskTop = float.MaxValue
@@ -106,7 +106,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 5,
+                BrushSize = 1,
                 Falloff = 0.5f,
                 MaskBottom = 0,
                 MaskTop = float.MaxValue
@@ -120,7 +120,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 10,
+                BrushSize = 1,
                 Falloff = 0.25f,
                 MaskTop = 0,
                 MaskBottom = float.MinValue,
@@ -134,7 +134,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 10,
+                BrushSize = 1,
                 Falloff = 0.25f,
                 MaskTop = 0,
                 MaskBottom = float.MaxValue
@@ -148,7 +148,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 5,
+                BrushSize = 1,
                 Falloff = 0.5f,
                 MaskTop = 0,
                 MaskBottom = float.MaxValue
@@ -162,7 +162,7 @@ public class ToolElevationPanel : MonoBehaviour
         {
             SelectionOptions = new EditHUD.CellSelectionOptions
             {
-                BrushSize = 5,
+                BrushSize = 1,
                 Falloff = 0.5f,
                 MaskTop = float.MinValue,
                 MaskBottom = float.MaxValue,

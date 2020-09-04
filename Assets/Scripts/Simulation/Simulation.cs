@@ -5,8 +5,19 @@ using UnityEngine;
 
 public static class Simulation
 {
-	public static JobHandle Tick(SimState lastState, SimState nextState, JobHandle dependency)
+
+	static JobHelper _columnJobHelper;
+	static JobHelper _neighborJobHelper;
+
+	public static void Init(int columns)
 	{
+		_columnJobHelper = new JobHelper(columns);
+		_neighborJobHelper = new JobHelper(columns * StaticState.MaxNeighbors);
+	}
+	public static JobHandle Tick(SimState lastState, SimState nextState, StaticState staticState, TempState tempState, WorldData worldData, JobHandle dependency)
+	{
+		float coriolisTerm = 2 * lastState.Planet.SpinSpeed;
+
 		nextState.CarbonDioxideMass.CopyFrom(lastState.CarbonDioxideMass);
 		nextState.CloudMass.CopyFrom(lastState.CloudMass);
 		nextState.Current.CopyFrom(lastState.Current);
@@ -20,7 +31,79 @@ public static class Simulation
 		nextState.Temperature.CopyFrom(lastState.Temperature);
 		nextState.VaporMass.CopyFrom(lastState.VaporMass);
 		nextState.WaterMass.CopyFrom(lastState.WaterMass);
+
+		nextState.WaterDepth.CopyFrom(lastState.WaterDepth);
+		nextState.Flow.CopyFrom(lastState.Flow);
+		nextState.Vegetation.CopyFrom(lastState.Vegetation);
+		nextState.Sand.CopyFrom(lastState.Sand);
+		nextState.Dirt.CopyFrom(lastState.Dirt);
+		nextState.OrganicMass.CopyFrom(lastState.OrganicMass);
+		nextState.Elevation.CopyFrom(lastState.Elevation);
+
 		nextState.Planet = lastState.Planet;
+
+
+
+		bool sync = false;
+		dependency = _columnJobHelper.Schedule(sync, 1, dependency,
+			new UpdateSurfaceElevationJob()
+			{
+				SurfaceElevation = tempState.SurfaceElevation,
+				WaterDepth = nextState.WaterDepth,
+				Elevation = nextState.Elevation
+			});
+
+
+		dependency = _neighborJobHelper.Schedule(sync, 1, dependency,
+			new UpdateFlowVelocityJob()
+			{
+				Flow = nextState.Flow,
+				LastFlow = lastState.Flow,
+				SurfaceElevation = tempState.SurfaceElevation,
+				WaterDepth = nextState.WaterDepth,
+				NeighborDistInverse = staticState.NeighborDistInverse,
+				Neighbors = staticState.Neighbors,
+				SecondsPerTick = worldData.SecondsPerTick,
+				Gravity = nextState.Planet.Gravity,
+				Damping = worldData.SurfaceWaterFlowDamping,
+				ViscosityInverse = 1.0f - worldData.WaterViscosity
+			});
+		dependency = _columnJobHelper.Schedule(sync, 1, dependency,
+			new SumOutgoingFlowJob()
+			{
+				OutgoingFlow = tempState.OutgoingFlow,
+				Flow = nextState.Flow,
+			});
+		dependency = _neighborJobHelper.Schedule(sync, 1, dependency,
+			new LimitOutgoingFlowJob()
+			{
+				Flow = nextState.Flow,
+				FlowPercent = tempState.FlowPercent,
+				OutgoingFlow = tempState.OutgoingFlow,
+				WaterDepth = nextState.WaterDepth,
+				Neighbors = staticState.Neighbors,
+			});
+		dependency = _columnJobHelper.Schedule(sync, 1, dependency,
+			new ApplyFlowWaterJob()
+			{
+				Delta = tempState.WaterDelta,
+				Depth = nextState.WaterDepth,
+				Positions = staticState.SphericalPosition,
+				Neighbors = staticState.Neighbors,
+				ReverseNeighbors = staticState.ReverseNeighbors,
+				FlowPercent = tempState.FlowPercent,
+				CoriolisMultiplier = staticState.CoriolisMultiplier,
+				CoriolisTerm = coriolisTerm,
+				SecondsPerTick = worldData.SecondsPerTick
+
+			});
+		dependency = _columnJobHelper.Schedule(sync, 1, dependency,
+			new ApplyWaterDeltaJob()
+			{
+				Depth = nextState.WaterDepth,
+				Delta = tempState.WaterDelta,
+			});
+
 		return dependency;
 	}
 }

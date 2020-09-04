@@ -24,6 +24,7 @@ public class SimState
 	public NativeArray<float> Sand;
 	public NativeArray<float> Vegetation;
 	public NativeArray<float3> Current;
+	public NativeArray<float> Flow;
 
 	public NativeArray<float> Elevation;
 	public NativeArray<float> WaterDepth;
@@ -31,27 +32,28 @@ public class SimState
 
 	private bool _initialized;
 
-	public void Init(int columns, int height)
+	public void Init(StaticState staticState)
 	{		
-		Temperature = new NativeArray<float>(columns * height, Allocator.Persistent);
-		LandMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		VaporMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		CloudMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		IceMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		WaterMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		SaltMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		MineralMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		CarbonDioxideMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		OxygenMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		NitrogenMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		OrganicMass = new NativeArray<float>(columns * height, Allocator.Persistent);
-		Dirt = new NativeArray<float>(columns * height, Allocator.Persistent);
-		Sand = new NativeArray<float>(columns * height, Allocator.Persistent);
-		Vegetation = new NativeArray<float>(columns * height, Allocator.Persistent);
-		Current = new NativeArray<float3>(columns * height, Allocator.Persistent);
+		Temperature = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		LandMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		VaporMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		CloudMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		IceMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		WaterMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		SaltMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		MineralMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		CarbonDioxideMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		OxygenMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		NitrogenMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		OrganicMass = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		Dirt = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		Sand = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		Vegetation = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		Current = new NativeArray<float3>(staticState.Count, Allocator.Persistent);
 
-		Elevation = new NativeArray<float>(columns, Allocator.Persistent);
-		WaterDepth = new NativeArray<float>(columns, Allocator.Persistent);
+		Elevation = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		WaterDepth = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+		Flow = new NativeArray<float>(staticState.Count * StaticState.MaxNeighbors, Allocator.Persistent);
 
 		_initialized = true;
 	}
@@ -80,6 +82,7 @@ public class SimState
 		Vegetation.Dispose();
 		Current.Dispose();
 
+		Flow.Dispose();
 		Elevation.Dispose();
 		WaterDepth.Dispose();
 	}
@@ -105,6 +108,7 @@ public class SimState
 		Vegetation.CopyFrom(from.Vegetation);
 		Current.CopyFrom(from.Current);
 
+		Flow.CopyFrom(from.Flow);
 		Elevation.CopyFrom(from.Elevation);
 		WaterDepth.CopyFrom(from.WaterDepth);
 	}

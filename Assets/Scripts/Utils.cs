@@ -217,7 +217,7 @@ public class JobHelper
 	}
 
 
-	public JobHandle Schedule<T>(bool runSynchronously, int batchCount, T job, JobHandle dependencies = default(JobHandle)) where T : struct, IJobParallelFor
+	public JobHandle Schedule<T>(bool runSynchronously, int batchCount, JobHandle dependencies, T job) where T : struct, IJobParallelFor
 	{
 		if (!runSynchronously)
 		{
@@ -227,16 +227,16 @@ public class JobHelper
 		job.Run(_cellCount);
 		return default(JobHandle);
 	}
-	public JobHandle Schedule<T>(JobType jobType, int batchCount, T job, JobHandle dependencies = default(JobHandle)) where T : struct, IJobParallelFor
+	public JobHandle Schedule<T>(JobType jobType, int batchCount, JobHandle dependencies, T job) where T : struct, IJobParallelFor
 	{
-		return Schedule(jobType == JobType.Run, batchCount, job, dependencies);
+		return Schedule(jobType == JobType.Run, batchCount, dependencies, job);
 	}
-	public JobHandle ScheduleOrMemset<S, T>(bool runSynchronously, int batchCount, bool schedule, NativeArray<S> arrayToSet, S setVal, T job, JobHandle dependencies = default(JobHandle)) where T : struct, IJobParallelFor where S : struct
+	public JobHandle ScheduleOrMemset<S, T>(bool runSynchronously, int batchCount, bool schedule, NativeArray<S> arrayToSet, S setVal, JobHandle dependencies, T job) where T : struct, IJobParallelFor where S : struct
 	{
 		// TODO: we need a version of this for slices
 		if (schedule)
 		{
-			return Schedule(runSynchronously, batchCount, job, dependencies);
+			return Schedule(runSynchronously, batchCount, dependencies, job);
 		}
 		else
 		{

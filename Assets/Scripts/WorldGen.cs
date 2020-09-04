@@ -6,6 +6,16 @@ public static class WorldGen
 {
 	static public void Generate(int columns, int height, WorldGenData data, SimState state, StaticState staticState)
 	{
+		state.Planet.Gravity = data.Gravity;
+		state.Planet.DistanceToSun = data.DistanceToSun;
+		state.Planet.Rotation = math.radians(math.float3(data.TiltAngle, 0, 0));
+		state.Planet.Position = math.float3(1, 0, 0) * data.DistanceToSun;
+		state.Planet.SpinSpeed = math.PI * 2 / (data.SpinTime * 60 * 60);
+		state.Planet.OrbitSpeed = math.PI * 2 / data.OrbitTime;
+		state.Planet.AngularSpeed = math.PI * 2 / (data.SpinTime * 60 * 60);
+		state.Planet.GeothermalHeat = data.GeothermalHeat;
+		state.Planet.SolarRadiation = data.SolarRadiation;
+
 		for (int i=0;i<columns;i++)
 		{
 			var pos = staticState.SphericalPosition[i];

@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
 
 	private WorldGenData _worldGenData = new WorldGenData();
     private SimState[] _simStates = new SimState[2];
+	private TempState _tempState;
     private int _curSimStateIndex;
     private bool _initialized;
 	private JobHandle _simJobHandle;
@@ -85,6 +86,7 @@ public class GameManager : MonoBehaviour
 		}
 		StaticState.Dispose();
 		Icosphere.Dispose();
+		_tempState.Dispose();
 	}
 
 	public void NewGame()
@@ -95,18 +97,22 @@ public class GameManager : MonoBehaviour
 
 		_worldGenData = JsonUtility.FromJson<WorldGenData>(WorldGenAsset.text);
 
-
 		Icosphere = Instantiate(IcospherePrefab, transform);
 		Icosphere.Init(Subdivisions);
 
 		StaticState = new StaticState();
 		StaticState.Init(_worldGenData.Radius, Icosphere, ref WorldData);
 
+		Simulation.Init(StaticState.Count);
+
+		_tempState = new TempState(StaticState);
+
+
 		int height = 3;
 		for (int i = 0; i < _simStates.Length; i++)
 		{
 			_simStates[i] = new SimState();
-			_simStates[i].Init(StaticState.Count, height);
+			_simStates[i].Init(StaticState);
 		}
 
 		WorldGen.Generate(StaticState.Count, height, _worldGenData, _simStates[_curSimStateIndex], StaticState);
@@ -130,11 +136,18 @@ public class GameManager : MonoBehaviour
 		return _simStates[_curSimStateIndex];
 	}
 
+	private void FixedUpdate()
+	{
+		if (_initialized)
+		{
+			Tick();
+		}
+	}
 
 	void Tick()
 	{
         int nextState = (_curSimStateIndex + 1) % _simStates.Length;
-		_simJobHandle = Simulation.Tick(_simStates[_curSimStateIndex], _simStates[nextState], _simJobHandle);
+		_simJobHandle = Simulation.Tick(_simStates[_curSimStateIndex], _simStates[nextState], StaticState, _tempState, WorldData, _simJobHandle);
 		_simJobHandle.Complete();
 		_curSimStateIndex = nextState;
         SimTickEvent?.Invoke(_simStates[nextState]);

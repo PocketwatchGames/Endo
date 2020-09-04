@@ -2323,7 +2323,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a82caabad98536c4fbce7d0afd8f4628, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Subdivisions: 1
+  Subdivisions: 5
   WorldGenAsset: {fileID: 4900000, guid: be535b815a18dbf41be2d46e5bd0d97d, type: 3}
   WorldDataAsset: {fileID: 4900000, guid: c060021e99881ba4fbed7723fd5b6892, type: 3}
   IcospherePrefab: {fileID: 469459222525136062, guid: 88249b9470df0cc4d8bc0216cfab1d6e,
