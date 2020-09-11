@@ -31,6 +31,7 @@ namespace Endo
 				state.Sand[i] = math.saturate(noise.snoise(pos + new float3(6567)));
 				state.Vegetation[i] = math.saturate(noise.snoise(pos + new float3(543252)));
 				state.Temperature[i] = WorldData.FreezingTemperature;
+				state.Explored[i] = pos.x > 0.2f ? 1 : 0;
 			}
 		}
 	}

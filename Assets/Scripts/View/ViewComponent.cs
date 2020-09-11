@@ -139,6 +139,7 @@ namespace Endo
         private NativeArray<float3> _terrainVertices;
         private NativeArray<float4> _terrainColors;
         private NativeArray<float3> _terrainNormals;
+        private NativeArray<float4> _terrainUVs;
 
         private List<int> _waterBackfaceIndices;
         private NativeArray<float3> _waterVertices;
@@ -199,7 +200,7 @@ namespace Endo
             overlayMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             OverlayMesh.GetComponent<MeshFilter>().sharedMesh = overlayMesh;
 
-            Foliage.Init(Sim.StaticState.Count, ref Sim.StaticState);
+            Foliage.Init(Sim.StaticState.Count, Sim.StaticState);
 
             _perCellJobHelper = new JobHelper(Sim.StaticState.Count);
             _perVertexJobHelper = new JobHelper(Sim.StaticState.Count * VertsPerCell);
@@ -207,6 +208,7 @@ namespace Endo
             _terrainVertices = new NativeArray<float3>(Sim.StaticState.Count * VertsPerCell, Allocator.Persistent);
             _terrainNormals = new NativeArray<float3>(Sim.StaticState.Count * VertsPerCell, Allocator.Persistent);
             _terrainColors = new NativeArray<float4>(Sim.StaticState.Count * VertsPerCell, Allocator.Persistent);
+            _terrainUVs = new NativeArray<float4>(Sim.StaticState.Count * VertsPerCell, Allocator.Persistent);
             _terrainIndices = new List<int>();
 
             _waterVertices = new NativeArray<float3>(Sim.StaticState.Count * VertsPerCell, Allocator.Persistent);
@@ -341,6 +343,7 @@ namespace Endo
             _terrainVertices.Dispose();
             _terrainNormals.Dispose();
             _terrainColors.Dispose();
+            _terrainUVs.Dispose();
 
             _waterVertices.Dispose();
             _waterNormals.Dispose();
@@ -352,6 +355,9 @@ namespace Endo
             _standardVerts.Dispose();
 
             _selectionCells.Dispose();
+
+            _normalizedBlueBlackRed.Dispose();
+            _normalizedRainbow.Dispose();
         }
 
         public int GetClosestVert(int triangleIndex, int vIndex)
@@ -399,7 +405,7 @@ namespace Endo
             //to.Rotation = math.degrees(from.PlanetState.Rotation);
 
             MeshOverlayData meshOverlay;
-            bool useMeshOverlay = GetMeshOverlayData(ActiveOverlay, ref from, ref staticState, ref worldData, out meshOverlay);
+            bool useMeshOverlay = GetMeshOverlayData(ActiveOverlay, from, staticState, worldData, out meshOverlay);
 
             var buildRenderStateJobHandle = _perCellJobHelper.Schedule(
                 true, 1, dependency,
@@ -410,6 +416,7 @@ namespace Endo
                     WaterColor = to.WaterColor,
                     WaterElevation = to.WaterElevation,
                     OverlayColor = to.OverlayColor,
+                    TerrainState = to.TerrainState,
 
                     Elevation = from.Elevation,
                     WaterDepth = from.WaterDepth,
@@ -417,6 +424,7 @@ namespace Endo
                     Sand = from.Sand,
                     Vegetation = from.Vegetation,
                     Ice = from.IceMass,
+                    Explored = from.Explored,
                     MeshOverlayMin = meshOverlay.Colors.Min,
                     MeshOverlayInverseRange = meshOverlay.InverseRange,
                     MeshOverlayData = meshOverlay.Values,
@@ -437,6 +445,7 @@ namespace Endo
             dependencies.Add((new LerpJobfloat4 { Progress = t, Out = state.TerrainColor, Start = lastState.TerrainColor, End = nextState.TerrainColor }).Schedule(cellCount, batchCount));
             dependencies.Add((new LerpJobfloat { Progress = t, Out = state.WaterElevation, Start = lastState.WaterElevation, End = nextState.WaterElevation }).Schedule(cellCount, batchCount));
             dependencies.Add((new LerpJobfloat4 { Progress = t, Out = state.WaterColor, Start = lastState.WaterColor, End = nextState.WaterColor }).Schedule(cellCount, batchCount));
+            dependencies.Add((new LerpJobfloat4 { Progress = t, Out = state.TerrainState, Start = lastState.TerrainState, End = nextState.TerrainState }).Schedule(cellCount, batchCount));
 
             if (ActiveOverlay != MeshOverlay.None)
             {
@@ -461,12 +470,14 @@ namespace Endo
                     VWaterColor = _waterColors,
                     VOverlayColor = _overlayColors,
                     VOverlayPosition = _overlayVertices,
+                    VTerrainUVs = _terrainUVs,
 
                     TerrainElevation = viewState.TerrainElevation,
                     TerrainColor = viewState.TerrainColor,
                     WaterElevation = viewState.WaterElevation,
                     WaterColor = viewState.WaterColor,
                     OverlayColor = viewState.OverlayColor,
+                    TerrainState = viewState.TerrainState,
                     Selection = _selectionCells,
                     StandardVerts = _standardVerts,
                 });
@@ -477,6 +488,7 @@ namespace Endo
             terrainMesh.SetVertices(_terrainVertices);
             //terrainMesh.SetNormals(_terrainNormals);
             terrainMesh.SetColors(_terrainColors);
+            terrainMesh.SetUVs(0, _terrainUVs);
 
             if (ActiveOverlay != MeshOverlay.None || !_indicesInitialized)
             {
@@ -487,6 +499,7 @@ namespace Endo
             waterMesh.SetVertices(_waterVertices);
             waterMesh.SetNormals(_waterNormals);
             waterMesh.SetColors(_waterColors);
+            waterMesh.SetUVs(0, _terrainUVs);
             waterBackfaceMesh.SetVertices(_waterVertices);
 
             if (!_indicesInitialized)
@@ -530,7 +543,7 @@ namespace Endo
         }
 
 
-        private bool GetMeshOverlayData(MeshOverlay activeOverlay, ref SimState simState, ref StaticState staticState, ref WorldData worldData, out MeshOverlayData overlay)
+        private bool GetMeshOverlayData(MeshOverlay activeOverlay, SimState simState, StaticState staticState, WorldData worldData, out MeshOverlayData overlay)
         {
             float ticksPerYear = worldData.TicksPerSecond * 60 * 60 * 24 * 365;
             MeshOverlayColors colors;

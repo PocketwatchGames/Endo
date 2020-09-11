@@ -14,6 +14,7 @@ namespace Endo
 		public NativeArray<float> WaterElevation;
 		public NativeArray<float> CloudDensity;
 		public NativeArray<float> IceDensity;
+		public NativeArray<float4> TerrainState;
 		public NativeArray<Color32> OverlayColor;
 
 		public void Init(int columns, int height)
@@ -25,6 +26,7 @@ namespace Endo
 			WaterElevation = new NativeArray<float>(columns, Allocator.Persistent);
 			CloudDensity = new NativeArray<float>(columns, Allocator.Persistent);
 			IceDensity = new NativeArray<float>(columns, Allocator.Persistent);
+			TerrainState = new NativeArray<float4>(columns, Allocator.Persistent);
 		}
 
 		public void Dispose()
@@ -36,6 +38,7 @@ namespace Endo
 			WaterElevation.Dispose();
 			CloudDensity.Dispose();
 			IceDensity.Dispose();
+			TerrainState.Dispose();
 
 		}
 	}

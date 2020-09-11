@@ -96,9 +96,9 @@ namespace Endo
 			Icosphere.Init(Subdivisions);
 
 			StaticState = new StaticState();
-			StaticState.Init(_worldGenData.Radius, Icosphere, ref WorldData);
+			StaticState.Init(_worldGenData.Radius, Icosphere, WorldData);
 
-			_simulation = new SimTick(StaticState.Count);
+			_simulation = new SimTick(StaticState);
 
 			_tempState = new TempState(StaticState);
 

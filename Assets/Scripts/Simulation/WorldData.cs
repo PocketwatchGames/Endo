@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Endo
 {
 	[Serializable]
-	public struct WorldData
+	public class WorldData
 	{
 
 		public const int TerrainLayers = 5;

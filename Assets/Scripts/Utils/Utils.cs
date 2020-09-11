@@ -217,6 +217,16 @@ public class JobHelper
 	}
 
 
+	public JobHandle Schedule<T>(bool runSynchronously, JobHandle dependencies, T job) where T : struct, IJob
+	{
+		if (!runSynchronously)
+		{
+			return job.Schedule(dependencies);
+		}
+		dependencies.Complete();
+		job.Run();
+		return default(JobHandle);
+	}
 	public JobHandle Schedule<T>(bool runSynchronously, int batchCount, JobHandle dependencies, T job) where T : struct, IJobParallelFor
 	{
 		if (!runSynchronously)

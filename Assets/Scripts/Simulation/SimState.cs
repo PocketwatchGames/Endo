@@ -30,6 +30,7 @@ namespace Endo
 		public NativeArray<float> VaporMass;
 		public NativeArray<float> CloudMass;
 		public NativeArray<float> IceMass;
+		public NativeArray<float> Explored;
 		public NativeArray<float> WaterMass;
 		public NativeArray<float> SaltMass;
 		public NativeArray<float> MineralMass;
@@ -46,6 +47,8 @@ namespace Endo
 		public NativeArray<float> Elevation;
 		public NativeArray<float> WaterDepth;
 
+		public NativeArray<int> AnimalPosition;
+		public NativeArray<int> AnimalSpecies;
 
 		private bool _initialized;
 
@@ -71,6 +74,10 @@ namespace Endo
 			Elevation = new NativeArray<float>(staticState.Count, Allocator.Persistent);
 			WaterDepth = new NativeArray<float>(staticState.Count, Allocator.Persistent);
 			Flow = new NativeArray<float>(staticState.Count * StaticState.MaxNeighbors, Allocator.Persistent);
+
+			Explored = new NativeArray<float>(staticState.Count, Allocator.Persistent);
+			AnimalPosition = new NativeArray<int>(staticState.AnimalCount, Allocator.Persistent);
+			AnimalSpecies = new NativeArray<int>(staticState.AnimalCount, Allocator.Persistent);
 
 			_initialized = true;
 		}
@@ -102,6 +109,10 @@ namespace Endo
 			Flow.Dispose();
 			Elevation.Dispose();
 			WaterDepth.Dispose();
+			Explored.Dispose();
+
+			AnimalPosition.Dispose();
+			AnimalSpecies.Dispose();
 		}
 
 		public void CopyFrom(SimState from)
@@ -128,6 +139,10 @@ namespace Endo
 			Flow.CopyFrom(from.Flow);
 			Elevation.CopyFrom(from.Elevation);
 			WaterDepth.CopyFrom(from.WaterDepth);
+			Explored.CopyFrom(from.Explored);
+
+			AnimalPosition.CopyFrom(from.AnimalPosition);
+			AnimalSpecies.CopyFrom(from.AnimalSpecies);
 		}
 
 

@@ -15,6 +15,7 @@ namespace Endo
 		public const int NeighborDown = MaxNeighborsVert - 2;
 
 		public int Count;
+		public int AnimalCount;
 		public float PlanetRadius;
 		public float CellSurfaceArea;
 		public float CellRadius;
@@ -34,7 +35,7 @@ namespace Endo
 		private WorldData _worldData;
 
 
-		public void Init(float radius, Icosphere icosphere, ref WorldData worldData)
+		public void Init(float radius, Icosphere icosphere, WorldData worldData)
 		{
 			_worldData = worldData;
 			PlanetRadius = radius;

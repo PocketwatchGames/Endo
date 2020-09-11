@@ -10,11 +10,13 @@ namespace Endo
 
 		JobHelper _columnJobHelper;
 		JobHelper _neighborJobHelper;
+		JobHelper _animalJobHelper;
 
-		public SimTick(int columns)
+		public SimTick(StaticState staticState)
 		{
-			_columnJobHelper = new JobHelper(columns);
-			_neighborJobHelper = new JobHelper(columns * StaticState.MaxNeighbors);
+			_columnJobHelper = new JobHelper(staticState.Count);
+			_neighborJobHelper = new JobHelper(staticState.Count * StaticState.MaxNeighbors);
+			_animalJobHelper = new JobHelper(staticState.AnimalCount);
 		}
 		public JobHandle Tick(SimState lastState, SimState nextState, StaticState staticState, TempState tempState, WorldData worldData, JobHandle dependency)
 		{
@@ -41,6 +43,10 @@ namespace Endo
 			nextState.Dirt.CopyFrom(lastState.Dirt);
 			nextState.OrganicMass.CopyFrom(lastState.OrganicMass);
 			nextState.Elevation.CopyFrom(lastState.Elevation);
+			nextState.Explored.CopyFrom(lastState.Explored);
+
+			nextState.AnimalSpecies.CopyFrom(lastState.AnimalSpecies);
+			nextState.AnimalPosition.CopyFrom(lastState.AnimalPosition);
 
 			nextState.Planet = lastState.Planet;
 
@@ -105,6 +111,13 @@ namespace Endo
 					Depth = nextState.WaterDepth,
 					Delta = tempState.WaterDelta,
 				});
+
+			dependency = _animalJobHelper.Schedule(sync, dependency, new UpdateExplorationJob()
+			{
+				Exploration = nextState.Explored,
+				AnimalSpecies = nextState.AnimalSpecies,
+				AnimalPositions = nextState.AnimalPosition,
+			});
 
 			return dependency;
 		}

@@ -58,7 +58,7 @@ namespace Endo
 		private NativeArray<FoliageState> _foliageState;
 		private NativeArray<FoliageTransform> _foliageTransform;
 
-		public void Init(int cellCount, ref StaticState staticState)
+		public void Init(int cellCount, StaticState staticState)
 		{
 			_maxFoliagePerCell = MaxFoliagePerCell;
 			_foliage = new GameObject[cellCount * _maxFoliagePerCell];
@@ -93,7 +93,7 @@ namespace Endo
 			_foliageTransform.Dispose();
 		}
 
-		public JobHandle Tick(ref TempState tempState, JobHandle dependency)
+		public JobHandle Tick(TempState tempState, JobHandle dependency)
 		{
 			var updateStateJob = new UpdateFoliageSimStateJob()
 			{
@@ -106,7 +106,7 @@ namespace Endo
 		}
 
 
-		public void Update(ref ViewState viewState)
+		public void Update(ViewState viewState)
 		{
 			var updateStateJob = new UpdateFoliageRenderStateJob()
 			{
